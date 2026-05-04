@@ -6,138 +6,473 @@
   <title>CS2 Gambling</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #0f0f1a;
-      color: #fff;
-      min-height: 100vh;
+    :root {
+      --bg: #0a0a0f;
+      --bg2: #111118;
+      --bg3: #1a1a26;
+      --border: #2a2a40;
+      --accent: #f0c040;
+      --accent2: #e05050;
+      --blue: #4a90d9;
+      --text: #ffffff;
+      --text2: #888899;
+    }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* NAVBAR */
+    nav {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 0 30px;
+      height: 60px;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      padding: 40px 20px;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
-    h1 { font-size: 2.5rem; margin-bottom: 10px; color: #e94560; }
-    .subtitle { color: #888; margin-bottom: 30px; }
-    .card {
-      background: #1a1a2e;
-      border-radius: 12px;
-      padding: 30px;
-      width: 100%;
-      max-width: 500px;
-      margin-bottom: 20px;
-      border: 1px solid #2a2a4a;
+    .logo { font-size: 1.4rem; font-weight: 900; color: var(--accent); letter-spacing: 2px; }
+    .logo span { color: var(--accent2); }
+    .nav-links { display: flex; gap: 5px; }
+    .nav-btn {
+      background: none;
+      border: none;
+      color: var(--text2);
+      padding: 8px 16px;
+      cursor: pointer;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      transition: all 0.2s;
     }
-    .avatar { width: 50px; border-radius: 50%; margin-right: 12px; vertical-align: middle; }
-    .username { font-size: 1.2rem; font-weight: bold; }
-    button {
-      background: #e94560;
+    .nav-btn:hover, .nav-btn.active { background: var(--bg3); color: var(--text); }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .balance-display {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      color: var(--accent);
+    }
+    .user-info { display: flex; align-items: center; gap: 8px; }
+    .user-info img { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--accent); }
+    .user-info span { font-size: 0.9rem; }
+    .btn-login {
+      background: linear-gradient(135deg, #1a73e8, #0d47a1);
       color: white;
       border: none;
-      padding: 14px 28px;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 8px;
-      margin: 8px;
-      transition: background 0.2s;
-      width: 100%;
-    }
-    button:hover { background: #c73652; }
-    .btn-secondary { background: #2a2a4a; }
-    .btn-secondary:hover { background: #3a3a6a; }
-    #resultado {
-      margin-top: 20px;
-      padding: 15px;
-      border-radius: 8px;
-      font-size: 1.1rem;
-      display: none;
-    }
-    .ganhou { background: #1a4a2a; border: 1px solid #2a8a4a; }
-    .perdeu { background: #4a1a1a; border: 1px solid #8a2a2a; }
-    #skins { margin-top: 15px; }
-    .skin-item {
-      background: #2a2a4a;
-      padding: 10px 15px;
+      padding: 8px 18px;
       border-radius: 6px;
-      margin-bottom: 8px;
+      cursor: pointer;
       font-size: 0.9rem;
+      font-weight: bold;
     }
-    .hidden { display: none; }
+    .btn-logout {
+      background: var(--bg3);
+      color: var(--text2);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    /* PAGES */
+    .page { display: none; padding: 30px; max-width: 1200px; margin: 0 auto; }
+    .page.active { display: block; }
+
+    /* HERO */
+    .hero {
+      text-align: center;
+      padding: 60px 20px 40px;
+      background: radial-gradient(ellipse at top, #1a1a35 0%, transparent 70%);
+    }
+    .hero h1 { font-size: 3rem; font-weight: 900; margin-bottom: 10px; }
+    .hero h1 span { color: var(--accent); }
+    .hero p { color: var(--text2); font-size: 1.1rem; }
+
+    /* CASES GRID */
+    .section-title { font-size: 1.3rem; font-weight: bold; margin-bottom: 20px; color: var(--accent); border-left: 3px solid var(--accent); padding-left: 12px; }
+    .cases-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+    .case-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .case-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+    .case-card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 8px 30px rgba(240,192,64,0.2); }
+    .case-icon { font-size: 3.5rem; margin-bottom: 10px; }
+    .case-name { font-weight: bold; font-size: 1rem; margin-bottom: 6px; }
+    .case-price { color: var(--accent); font-size: 1.2rem; font-weight: 900; }
+    .case-skins-preview { margin-top: 10px; font-size: 0.75rem; color: var(--text2); }
+
+    /* RARITY COLORS */
+    .rarity-Azul { color: #4a90d9; }
+    .rarity-Rosa { color: #e050b0; }
+    .rarity-Roxo { color: #9050e0; }
+    .rarity-Vermelho { color: #e05050; }
+
+    /* MODAL */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 30px;
+      width: 90%;
+      max-width: 550px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .modal-header h2 { font-size: 1.4rem; }
+    .btn-close { background: none; border: none; color: var(--text2); font-size: 1.5rem; cursor: pointer; }
+    .skins-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+    .skin-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg3);
+      padding: 10px 14px;
+      border-radius: 8px;
+      border-left: 3px solid transparent;
+    }
+    .skin-row.rarity-Azul { border-left-color: #4a90d9; }
+    .skin-row.rarity-Rosa { border-left-color: #e050b0; }
+    .skin-row.rarity-Roxo { border-left-color: #9050e0; }
+    .skin-row.rarity-Vermelho { border-left-color: #e05050; }
+    .skin-row-name { font-size: 0.9rem; }
+    .skin-row-weapon { font-size: 0.75rem; color: var(--text2); }
+    .skin-row-right { text-align: right; }
+    .skin-row-value { font-weight: bold; color: var(--accent); }
+    .skin-row-chance { font-size: 0.75rem; color: var(--text2); }
+    .btn-open {
+      width: 100%;
+      background: linear-gradient(135deg, var(--accent), #e08020);
+      color: #000;
+      border: none;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 900;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-open:hover { opacity: 0.9; }
+
+    /* WIN ANIMATION */
+    .win-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.9);
+      z-index: 300;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    .win-overlay.open { display: flex; animation: fadeIn 0.3s; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .win-box {
+      background: var(--bg2);
+      border-radius: 20px;
+      padding: 40px;
+      text-align: center;
+      border: 2px solid var(--accent);
+      box-shadow: 0 0 60px rgba(240,192,64,0.3);
+      max-width: 400px;
+      width: 90%;
+    }
+    .win-icon { font-size: 4rem; margin-bottom: 10px; }
+    .win-title { font-size: 1.8rem; font-weight: 900; color: var(--accent); margin-bottom: 6px; }
+    .win-skin { font-size: 1.1rem; margin-bottom: 4px; }
+    .win-value { font-size: 1.4rem; font-weight: bold; color: var(--accent); margin-bottom: 20px; }
+    .win-btns { display: flex; gap: 10px; }
+    .btn-sell-win {
+      flex: 1;
+      background: var(--accent2);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .btn-keep {
+      flex: 1;
+      background: var(--bg3);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    /* INVENTORY */
+    .inventory-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
+    .inv-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      position: relative;
+    }
+    .inv-card.equipped { border-color: var(--accent); }
+    .inv-equipped-badge {
+      position: absolute;
+      top: 8px; right: 8px;
+      background: var(--accent);
+      color: #000;
+      font-size: 0.65rem;
+      font-weight: bold;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .inv-weapon { font-size: 0.75rem; color: var(--text2); margin-bottom: 4px; }
+    .inv-name { font-weight: bold; font-size: 0.9rem; margin-bottom: 6px; }
+    .inv-value { color: var(--accent); font-weight: bold; margin-bottom: 10px; }
+    .inv-btns { display: flex; gap: 6px; }
+    .btn-inv {
+      flex: 1;
+      padding: 6px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+    .btn-equip { background: var(--blue); color: white; }
+    .btn-sell { background: var(--accent2); color: white; }
+    .empty-msg { color: var(--text2); text-align: center; padding: 40px; font-size: 1.1rem; }
   </style>
 </head>
 <body>
 
-  <h1>🎮 CS2 Gambling</h1>
-  <p class="subtitle">Ganha skins para usar no servidor!</p>
-
-  <div class="card" id="secao-user">
-    <div id="user-info"></div>
+<nav>
+  <div class="logo">CS2<span>DROP</span></div>
+  <div class="nav-links">
+    <button class="nav-btn active" onclick="showPage('cases')">🎁 Caixas</button>
+    <button class="nav-btn" onclick="showPage('inventory')">🎒 Inventário</button>
   </div>
-
-  <div class="card hidden" id="secao-jogo">
-    <h2 style="margin-bottom:15px">🪙 Coinflip</h2>
-    <p style="color:#888; margin-bottom:20px">50% de chance de ganhar uma AK-47 Redline!</p>
-    <button onclick="jogar()">Jogar Coinflip</button>
-    <div id="resultado"></div>
+  <div class="nav-right">
+    <div class="balance-display" id="balance-display" style="display:none">💰 <span id="balance-val">0</span>€</div>
+    <div id="nav-user"></div>
   </div>
+</nav>
 
-  <div class="card hidden" id="secao-skins">
-    <h2 style="margin-bottom:15px">🎨 As minhas skins</h2>
-    <button class="btn-secondary" onclick="verSkins()">Atualizar inventário</button>
-    <div id="skins"></div>
+<!-- CASES PAGE -->
+<div class="page active" id="page-cases">
+  <div class="hero">
+    <h1>Abre uma <span>Caixa</span></h1>
+    <p>Ganha skins exclusivas para usar no servidor CS2</p>
   </div>
+  <div style="max-width:1200px;margin:0 auto;padding:0 30px 30px">
+    <div class="section-title">🎁 Caixas Disponíveis</div>
+    <div class="cases-grid" id="cases-grid"></div>
+  </div>
+</div>
 
-  <script>
-    async function init() {
-      const res = await fetch('/auth/me');
-      const user = await res.json();
-      const userDiv = document.getElementById('user-info');
+<!-- INVENTORY PAGE -->
+<div class="page" id="page-inventory">
+  <div class="section-title">🎒 O Meu Inventário</div>
+  <div id="inventory-content"><div class="empty-msg">Carregando...</div></div>
+</div>
 
-      if (user.loggedIn) {
-        userDiv.innerHTML = `
-          <img class="avatar" src="${user.avatar}" alt="avatar">
-          <span class="username">${user.name}</span>
-          <br><br>
-          <button class="btn-secondary" onclick="window.location='/auth/logout'">Logout</button>
-        `;
-        document.getElementById('secao-jogo').classList.remove('hidden');
-        document.getElementById('secao-skins').classList.remove('hidden');
-        verSkins();
-      } else {
-        userDiv.innerHTML = `
-          <p style="margin-bottom:15px; color:#888">Faz login com a tua conta Steam para jogar</p>
-          <button onclick="window.location='/auth/steam'">🔑 Login com Steam</button>
-        `;
-      }
+<!-- CASE MODAL -->
+<div class="modal-overlay" id="case-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-title">Caixa</h2>
+      <button class="btn-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="skins-list" id="modal-skins"></div>
+    <button class="btn-open" id="modal-open-btn">Abrir Caixa</button>
+  </div>
+</div>
+
+<!-- WIN OVERLAY -->
+<div class="win-overlay" id="win-overlay">
+  <div class="win-box">
+    <div class="win-icon">🎉</div>
+    <div class="win-title">Parabéns!</div>
+    <div class="win-skin" id="win-skin-name"></div>
+    <div class="win-value" id="win-skin-value"></div>
+    <div class="win-btns">
+      <button class="btn-sell-win" id="btn-sell-win">💰 Vender</button>
+      <button class="btn-keep" onclick="closeWin()">🎒 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentUser = null;
+  let currentCaseId = null;
+  let lastWonSkinId = null;
+
+  async function init() {
+    const res = await fetch('/auth/me');
+    const user = await res.json();
+    const navUser = document.getElementById('nav-user');
+
+    if (user.loggedIn) {
+      currentUser = user;
+      document.getElementById('balance-display').style.display = 'flex';
+      document.getElementById('balance-val').textContent = parseFloat(user.balance).toFixed(2);
+      navUser.innerHTML = `
+        <div class="user-info">
+          <img src="${user.avatar}" alt="avatar">
+          <span>${user.name}</span>
+          <button class="btn-logout" onclick="window.location='/auth/logout'">Sair</button>
+        </div>`;
+    } else {
+      navUser.innerHTML = `<button class="btn-login" onclick="window.location='/auth/steam'">🔑 Login com Steam</button>`;
     }
+    loadCases();
+  }
 
-    async function jogar() {
-      const res = await fetch('/gambling/coinflip', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ weapon_defindex: 7, paint: 282 })
-      });
-      const data = await res.json();
-      const div = document.getElementById('resultado');
-      div.style.display = 'block';
-      div.className = data.resultado === 'ganhou' ? 'ganhou' : 'perdeu';
-      div.innerText = data.mensagem;
-      if (data.resultado === 'ganhou') verSkins();
+  async function loadCases() {
+    const res = await fetch('/gambling/cases');
+    const cases = await res.json();
+    const grid = document.getElementById('cases-grid');
+    grid.innerHTML = cases.map(c => `
+      <div class="case-card" onclick="openCaseModal('${c.id}', ${JSON.stringify(c).replace(/"/g, '&quot;')})">
+        <div class="case-icon">${c.image}</div>
+        <div class="case-name">${c.name}</div>
+        <div class="case-price">${c.price}€</div>
+        <div class="case-skins-preview">${c.skins.length} skins possíveis</div>
+      </div>
+    `).join('');
+  }
+
+  function openCaseModal(caseId, caseData) {
+    currentCaseId = caseId;
+    document.getElementById('modal-title').textContent = `${caseData.image} ${caseData.name} — ${caseData.price}€`;
+    document.getElementById('modal-skins').innerHTML = caseData.skins.map(s => `
+      <div class="skin-row rarity-${s.rarity}">
+        <div>
+          <div class="skin-row-name">${s.name}</div>
+          <div class="skin-row-weapon">${s.weapon} · <span class="rarity-${s.rarity}">${s.rarity}</span></div>
+        </div>
+        <div class="skin-row-right">
+          <div class="skin-row-value">${s.value}€</div>
+          <div class="skin-row-chance">${s.chance}%</div>
+        </div>
+      </div>
+    `).join('');
+    document.getElementById('modal-open-btn').onclick = () => openCase(caseId, caseData.price);
+    document.getElementById('case-modal').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('case-modal').classList.remove('open');
+  }
+
+  async function openCase(caseId, price) {
+    if (!currentUser) { alert('Faz login primeiro!'); return; }
+    const btn = document.getElementById('modal-open-btn');
+    btn.textContent = 'A abrir...';
+    btn.disabled = true;
+
+    const res = await fetch(`/gambling/open/${caseId}`, { method: 'POST' });
+    const data = await res.json();
+
+    btn.textContent = 'Abrir Caixa';
+    btn.disabled = false;
+
+    if (data.error) { alert(data.error); return; }
+
+    // Update balance
+    document.getElementById('balance-val').textContent = parseFloat(data.newBalance).toFixed(2);
+    closeModal();
+
+    // Show win
+    const skin = data.skin;
+    document.getElementById('win-skin-name').textContent = `${skin.weapon} | ${skin.name}`;
+    document.getElementById('win-skin-value').textContent = `Valor: ${skin.value}€`;
+
+    // Get skin id for sell
+    const inv = await fetch('/gambling/inventory');
+    const skins = await inv.json();
+    lastWonSkinId = skins[0]?.id;
+
+    document.getElementById('btn-sell-win').onclick = () => sellSkin(lastWonSkinId, true);
+    document.getElementById('win-overlay').classList.add('open');
+  }
+
+  function closeWin() {
+    document.getElementById('win-overlay').classList.remove('open');
+  }
+
+  async function sellSkin(skinId, fromWin = false) {
+    const res = await fetch(`/gambling/sell/${skinId}`, { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('balance-val').textContent = parseFloat(data.newBalance).toFixed(2);
+      if (fromWin) closeWin();
+      loadInventory();
     }
+  }
 
-    async function verSkins() {
-      const res = await fetch('/gambling/skins');
-      const skins = await res.json();
-      const div = document.getElementById('skins');
-      if (!skins.length) {
-        div.innerHTML = '<p style="color:#888; margin-top:10px">Ainda não tens skins!</p>';
-      } else {
-        div.innerHTML = skins.map(s =>
-          `<div class="skin-item">🔫 Arma ID: ${s.weapon_defindex} | Paint ID: ${s.paint}</div>`
-        ).join('');
-      }
+  async function equipSkin(skinId) {
+    await fetch(`/gambling/equip/${skinId}`, { method: 'POST' });
+    loadInventory();
+  }
+
+  function showPage(page) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    event.target.classList.add('active');
+    if (page === 'inventory') loadInventory();
+  }
+
+  async function loadInventory() {
+    const res = await fetch('/gambling/inventory');
+    const skins = await res.json();
+    const el = document.getElementById('inventory-content');
+    if (!skins.length) {
+      el.innerHTML = '<div class="empty-msg">Ainda não tens skins! Abre uma caixa 🎁</div>';
+      return;
     }
+    el.innerHTML = `<div class="inventory-grid">${skins.map(s => `
+      <div class="inv-card ${s.equipped ? 'equipped' : ''}">
+        ${s.equipped ? '<div class="inv-equipped-badge">EQUIPADO</div>' : ''}
+        <div class="inv-weapon">${s.weapon}</div>
+        <div class="inv-name rarity-${s.rarity}">${s.skin_name}</div>
+        <div class="inv-value">${s.value}€</div>
+        <div class="inv-btns">
+          <button class="btn-inv btn-equip" onclick="equipSkin(${s.id})">${s.equipped ? '✓ Equipado' : 'Equipar'}</button>
+          <button class="btn-inv btn-sell" onclick="sellSkin(${s.id})">Vender</button>
+        </div>
+      </div>
+    `).join('')}</div>`;
+  }
 
-    init();
-  </script>
+  init();
+</script>
 </body>
 </html>
