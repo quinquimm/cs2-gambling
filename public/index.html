@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CS2 Gambling</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f0f1a;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+    h1 { font-size: 2.5rem; margin-bottom: 10px; color: #e94560; }
+    .subtitle { color: #888; margin-bottom: 30px; }
+    .card {
+      background: #1a1a2e;
+      border-radius: 12px;
+      padding: 30px;
+      width: 100%;
+      max-width: 500px;
+      margin-bottom: 20px;
+      border: 1px solid #2a2a4a;
+    }
+    .avatar { width: 50px; border-radius: 50%; margin-right: 12px; vertical-align: middle; }
+    .username { font-size: 1.2rem; font-weight: bold; }
+    button {
+      background: #e94560;
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 8px;
+      margin: 8px;
+      transition: background 0.2s;
+      width: 100%;
+    }
+    button:hover { background: #c73652; }
+    .btn-secondary { background: #2a2a4a; }
+    .btn-secondary:hover { background: #3a3a6a; }
+    #resultado {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      display: none;
+    }
+    .ganhou { background: #1a4a2a; border: 1px solid #2a8a4a; }
+    .perdeu { background: #4a1a1a; border: 1px solid #8a2a2a; }
+    #skins { margin-top: 15px; }
+    .skin-item {
+      background: #2a2a4a;
+      padding: 10px 15px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+  <h1>🎮 CS2 Gambling</h1>
+  <p class="subtitle">Ganha skins para usar no servidor!</p>
+
+  <div class="card" id="secao-user">
+    <div id="user-info"></div>
+  </div>
+
+  <div class="card hidden" id="secao-jogo">
+    <h2 style="margin-bottom:15px">🪙 Coinflip</h2>
+    <p style="color:#888; margin-bottom:20px">50% de chance de ganhar uma AK-47 Redline!</p>
+    <button onclick="jogar()">Jogar Coinflip</button>
+    <div id="resultado"></div>
+  </div>
+
+  <div class="card hidden" id="secao-skins">
+    <h2 style="margin-bottom:15px">🎨 As minhas skins</h2>
+    <button class="btn-secondary" onclick="verSkins()">Atualizar inventário</button>
+    <div id="skins"></div>
+  </div>
+
+  <script>
+    async function init() {
+      const res = await fetch('/auth/me');
+      const user = await res.json();
+      const userDiv = document.getElementById('user-info');
+
+      if (user.loggedIn) {
+        userDiv.innerHTML = `
+          <img class="avatar" src="${user.avatar}" alt="avatar">
+          <span class="username">${user.name}</span>
+          <br><br>
+          <button class="btn-secondary" onclick="window.location='/auth/logout'">Logout</button>
+        `;
+        document.getElementById('secao-jogo').classList.remove('hidden');
+        document.getElementById('secao-skins').classList.remove('hidden');
+        verSkins();
+      } else {
+        userDiv.innerHTML = `
+          <p style="margin-bottom:15px; color:#888">Faz login com a tua conta Steam para jogar</p>
+          <button onclick="window.location='/auth/steam'">🔑 Login com Steam</button>
+        `;
+      }
+    }
+
+    async function jogar() {
+      const res = await fetch('/gambling/coinflip', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ weapon_defindex: 7, paint: 282 })
+      });
+      const data = await res.json();
+      const div = document.getElementById('resultado');
+      div.style.display = 'block';
+      div.className = data.resultado === 'ganhou' ? 'ganhou' : 'perdeu';
+      div.innerText = data.mensagem;
+      if (data.resultado === 'ganhou') verSkins();
+    }
+
+    async function verSkins() {
+      const res = await fetch('/gambling/skins');
+      const skins = await res.json();
+      const div = document.getElementById('skins');
+      if (!skins.length) {
+        div.innerHTML = '<p style="color:#888; margin-top:10px">Ainda não tens skins!</p>';
+      } else {
+        div.innerHTML = skins.map(s =>
+          `<div class="skin-item">🔫 Arma ID: ${s.weapon_defindex} | Paint ID: ${s.paint}</div>`
+        ).join('');
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
